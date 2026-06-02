@@ -1,0 +1,2269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaSify POS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ==========================================================================
+   Base Styles & Variables
+   ========================================================================== */
+:root {
+    /* Colors */
+    --primary: #4F46E5;
+    --primary-light: #818CF8;
+    --primary-dark: #3730A3;
+    
+    --secondary: #10B981;
+    --secondary-light: #34D399;
+    --secondary-dark: #059669;
+
+    --accent: #F43F5E;
+    --warning: #F59E0B;
+    --info: #0EA5E9;
+    
+    --dark-bg: #0F172A;
+    --dark-surface: #1E293B;
+    --dark-surface-border: rgba(255,255,255,0.1);
+    
+    --light-bg: #F8FAFC;
+    --light-surface: #FFFFFF;
+    --light-border: #E2E8F0;
+
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    
+    /* Layout */
+    --sidebar-width: 260px;
+    --header-height: 70px;
+    
+    /* Effects */
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    
+    --transition-fast: 0.2s ease;
+    --transition-norm: 0.3s ease;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-main);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-light);
+    transition: var(--transition-fast);
+}
+
+a:hover {
+    color: var(--primary);
+}
+
+ul {
+    list-style: none;
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 95;
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity var(--transition-norm);
+}
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* ==========================================================================
+   Typography & Utilities
+   ========================================================================== */
+h1, h2, h3, h4, h5, h6 {
+    color: #fff;
+    font-weight: 600;
+}
+
+.text-primary { color: var(--primary-light); }
+.text-success { color: var(--secondary-light); }
+.text-danger { color: var(--accent); }
+.text-warning { color: var(--warning); }
+.text-muted { color: var(--text-muted); }
+
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+
+.mt-2 { margin-top: 0.5rem; }
+.mt-4 { margin-top: 1rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, var(--secondary-light), var(--secondary));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-danger { background: var(--accent); color: white; }
+.btn-danger:hover { background: #E11D48; }
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--dark-surface-border);
+    color: var(--text-main);
+}
+.btn-outline:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.btn-block { width: 100%; }
+.btn-lg { padding: 0.8rem 1.5rem; font-size: 1rem; }
+.btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+.input-group {
+    margin-bottom: 1.2rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+.input-wrapper input, .input-wrapper select {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.8rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    color: white;
+    font-size: 0.95rem;
+    transition: var(--transition-fast);
+}
+
+.input-wrapper input:focus, .input-wrapper select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+/* ==========================================================================
+   Login Page Specific
+   ========================================================================== */
+.login-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    padding: 1rem;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: -1;
+}
+.blob-1 {
+    width: 400px; height: 400px;
+    background: rgba(79, 70, 229, 0.3);
+    top: -100px; left: -100px;
+}
+.blob-2 {
+    width: 300px; height: 300px;
+    background: rgba(16, 185, 129, 0.2);
+    bottom: -50px; right: 10%;
+}
+.blob-3 {
+    width: 350px; height: 350px;
+    background: rgba(244, 63, 94, 0.2);
+    top: 20%; left: 50%;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem;
+    border-radius: var(--radius-lg);
+    animation: slideUp 0.6s ease;
+}
+
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.logo i {
+    color: var(--primary-light);
+}
+
+.portal-selector {
+    display: flex;
+    background: rgba(0,0,0,0.2);
+    border-radius: var(--radius-sm);
+    padding: 0.3rem;
+    margin-bottom: 2rem;
+}
+
+.portal-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.6rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition-fast);
+}
+
+.portal-btn.active {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.login-form {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.login-form.active {
+    display: block;
+    opacity: 1;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   Dashboard Layout Structure
+   ========================================================================== */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--dark-surface);
+    border-right: 1px solid var(--dark-surface-border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    transition: transform var(--transition-norm);
+}
+
+.sidebar.open {
+    transform: translateX(0) !important;
+}
+
+.sidebar-header {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    border-bottom: 1px solid var(--dark-surface-border);
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+}
+
+.nav-item {
+    margin-bottom: 0.5rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+}
+
+.nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.nav-link:hover, .nav-link.active {
+    background: rgba(79, 70, 229, 0.1);
+    color: var(--primary-light);
+}
+
+.nav-link.active {
+    position: relative;
+}
+
+.nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary);
+    border-radius: 0 4px 4px 0;
+}
+
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--dark-surface-border);
+}
+
+.user-profile-sm {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: white;
+}
+
+.user-info .name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+}
+.user-info .role {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Top Header */
+.top-header {
+    height: var(--header-height);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--dark-surface-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.header-search {
+    position: relative;
+    width: 300px;
+}
+
+.header-search input {
+    width: 100%;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid transparent;
+    border-radius: 20px;
+    color: white;
+}
+
+.header-search input:focus {
+    background: rgba(255,255,255,0.1);
+    border-color: var(--glass-border);
+    outline: none;
+}
+
+.header-search i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition-fast);
+}
+
+.icon-btn:hover {
+    color: white;
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.6rem;
+    padding: 2px 5px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+/* Page Content */
+.page-content {
+    padding: 2rem;
+    flex: 1;
+    max-width: 100vw;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+/* ==========================================================================
+   Dashboard Widgets & Components
+   ========================================================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--dark-surface);
+    border: 1px solid var(--dark-surface-border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform var(--transition-fast);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+
+.stat-icon.primary { background: rgba(79, 70, 229, 0.1); color: var(--primary-light); }
+.stat-icon.success { background: rgba(16, 185, 129, 0.1); color: var(--secondary-light); }
+.stat-icon.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+.stat-icon.danger { background: rgba(244, 63, 94, 0.1); color: var(--accent); }
+
+.stat-details .label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+}
+
+.stat-details .value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+}
+
+.stat-details .trend {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.3rem;
+}
+
+/* Charts & Tables Section */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.panel {
+    background: var(--dark-surface);
+    border: 1px solid var(--dark-surface-border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--dark-surface-border);
+}
+
+.panel-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Tables */
+.table-responsive {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--dark-surface-border);
+}
+
+th {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+td {
+    font-size: 0.95rem;
+}
+
+tbody tr {
+    transition: var(--transition-fast);
+}
+
+tbody tr:hover {
+    background: rgba(255,255,255,0.02);
+}
+
+.status-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.status-active { background: rgba(16, 185, 129, 0.1); color: var(--secondary-light); border: 1px solid rgba(16, 185, 129, 0.2); }
+.status-inactive { background: rgba(244, 63, 94, 0.1); color: var(--accent); border: 1px solid rgba(244, 63, 94, 0.2); }
+.status-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+
+/* Animations */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in { animation: fadeIn 0.5s ease; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .header-search { width: 200px; }
+}
+
+@media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .main-content { margin-left: 0; width: 100vw; }
+    .menu-toggle { display: block !important; }
+    .page-content { padding: 1rem; }
+    
+    .stats-grid { grid-template-columns: 1fr; }
+    .header-search { display: none; }
+    .top-header { padding: 0 1rem; }
+    
+    /* Responsive Forms and Modals */
+    .glass-panel { padding: 1.5rem !important; }
+    
+    /* Prevent table from stretching body */
+    .table-responsive { max-width: 100vw; overflow-x: auto; }
+}
+
+.menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+        
+        
+        .pos-layout {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--dark-bg);
+        }
+        .pos-main {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--dark-surface-border);
+            flex: 2;
+        }
+        .pos-sidebar {
+            background: var(--dark-surface);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex: 1;
+        }
+        @media (max-width: 768px) {
+            .pos-layout { flex-direction: column; overflow-y: auto; height: auto; min-height: 100vh; }
+            .pos-main, .pos-sidebar { flex: none; width: 100%; height: auto; border-right: none; }
+            .pos-sidebar { border-top: 2px solid var(--primary); }
+            .cart-items { min-height: 300px; }
+            .product-grid { overflow-y: visible; margin-bottom: 2rem; }
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 0.5rem;
+            margin-top: 1rem;
+        }
+        .product-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--dark-surface-border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+        .product-card:hover {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.1);
+            transform: translateY(-2px);
+        }
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px dashed var(--dark-surface-border);
+        }
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            padding: 0.2rem 0.5rem;
+        }
+        .qty-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .qty-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .cart-summary {
+            padding: 1.5rem;
+            background: rgba(0,0,0,0.2);
+            border-top: 1px solid var(--dark-surface-border);
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--dark-surface-border);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: white;
+        }
+        .search-bar-lg {
+            position: relative;
+        }
+        .search-bar-lg input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            font-size: 1.1rem;
+            background: var(--dark-surface);
+            border: 1px solid var(--primary);
+            border-radius: var(--radius-md);
+            color: white;
+        }
+        .search-bar-lg i {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+    
+        
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
+    </style>
+</head>
+<body>
+    <div id="login-page" class="app-page login-body">
+    
+    <!-- Animated Background Elements -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="login-container glass-panel">
+        <div class="login-header">
+            <div class="logo">
+                <i class="fa-solid fa-layer-group"></i> SaaSify POS
+            </div>
+            <h2>Welcome Back</h2>
+            <p>Select your portal to continue</p>
+        </div>
+
+        <div class="portal-selector">
+            <button class="portal-btn active" id="btn-admin" onclick="switchPortal('admin')">
+                <i class="fa-solid fa-user-shield"></i> Super Admin
+            </button>
+            <button class="portal-btn" id="btn-client" onclick="switchPortal('client')">
+                <i class="fa-solid fa-store"></i> Shop Owner
+            </button>
+        </div>
+
+        <!-- Super Admin Login Form -->
+        <form id="admin-login-form" class="login-form active" onsubmit="handleLogin(event, 'admin-dashboard.html')">
+            <div class="input-group">
+                <label for="admin-email">Admin Email</label>
+                <div class="input-wrapper">
+                    <i class="fa-regular fa-envelope"></i>
+                    <input type="email" id="admin-email" placeholder="admin@saasify.com" value="admin@saasify.com" required>
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="admin-pass">Password</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="admin-pass" placeholder="••••••••" value="admin123" required>
+                </div>
+            </div>
+            <div class="form-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" checked> Remember me
+                </label>
+                <a href="#" class="forgot-link">Forgot Password?</a>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                Login as Super Admin <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </form>
+
+        <!-- Client Login Form -->
+        <form id="client-login-form" class="login-form" onsubmit="handleLogin(event, 'client-dashboard.html')">
+            <div class="input-group">
+                <label for="client-email">Shop Email</label>
+                <div class="input-wrapper">
+                    <i class="fa-regular fa-envelope"></i>
+                    <input type="email" id="client-email" placeholder="shop@client.com" value="demo@shop.com" required>
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="client-pass">Password</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="client-pass" placeholder="••••••••" value="shop123" required>
+                </div>
+            </div>
+            <div class="form-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" checked> Remember me
+                </label>
+                <a href="#" class="forgot-link">Forgot Password?</a>
+            </div>
+            <button type="submit" class="btn btn-secondary btn-block btn-lg">
+                Login to Shop Panel <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+
+    
+</div>
+    <div id="admin-page" class="app-page" style="display:none;">
+    
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-layer-group"></i> SaaSify POS
+                </div>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" onclick="switchAdminView('admin-dashboard-view', this)">
+                        <i class="fa-solid fa-gauge"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchAdminView('clients-view', this)">
+                        <i class="fa-solid fa-users"></i> Manage Clients
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchAdminView('commission-view', this)">
+                        <i class="fa-solid fa-indian-rupee-sign"></i> Commission
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="user-profile-sm">
+                    <div class="avatar">SA</div>
+                    <div class="user-info">
+                        <div class="name">Super Admin</div>
+                        <div class="role">System Administrator</div>
+                    </div>
+                </div>
+                <a href='#' onclick='showPage("login-page")' class="btn btn-outline btn-block mt-2">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content fade-in">
+            <!-- Top Header -->
+            <header class="top-header">
+                <button class="menu-toggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="header-search">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" placeholder="Search clients, transactions...">
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary btn-sm" onclick="openAddClientModal()">
+                        <i class="fa-solid fa-plus"></i> Add Client
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="page-content">
+                
+                <!-- DASHBOARD VIEW -->
+                <div id="admin-dashboard-view" class="view-section active">
+                    <div class="page-header">
+                        <div>
+                            <h2>Overview</h2>
+                            <p class="text-muted">Welcome back, here's what's happening across all shops.</p>
+                        </div>
+                    </div>
+                    <div class="stats-grid" id="admin-stats"></div>
+                    <div class="grid-2">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3 class="panel-title">Active Clients</h3>
+                                <button class="btn btn-outline btn-sm" onclick="document.querySelectorAll('.nav-link')[1].click()">View All</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="dash-clients-table">
+                                    <thead><tr><th>Shop Name</th><th>Plan</th><th>Total Sales</th><th>Status</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3 class="panel-title">Recent Commission</h3>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="transactions-table">
+                                    <thead><tr><th>Client</th><th>Amount</th><th>Commission</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MANAGE CLIENTS VIEW -->
+                <div id="clients-view" class="view-section">
+                    <div class="page-header">
+                        <div>
+                            <h2>Manage Clients</h2>
+                            <p class="text-muted">View and manage all registered shops.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="openAddClientModal()">
+                            <i class="fa-solid fa-plus"></i> Add New Client
+                        </button>
+                    </div>
+                    <div class="panel">
+                        <div class="table-responsive">
+                            <table id="full-clients-table">
+                                <thead>
+                                    <tr>
+                                        <th>Shop ID</th>
+                                        <th>Shop Info</th>
+                                        <th>Plan & Comm.</th>
+                                        <th>Total Sales</th>
+                                        <th>Joined</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COMMISSION VIEW -->
+                <div id="commission-view" class="view-section">
+                    <div class="page-header">
+                        <div>
+                            <h2>Commission Ledger</h2>
+                            <p class="text-muted">Detailed history of all commissions earned.</p>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="table-responsive">
+                            <table id="full-commission-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Transaction ID</th>
+                                        <th>Client</th>
+                                        <th>Sale Amount</th>
+                                        <th>Commission Earned</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Client Modal -->
+    <div id="addClientModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="glass-panel" style="width: 100%; max-width: 500px; padding: 2rem; border-radius: var(--radius-lg);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                <h3>Add New Client</h3>
+                <button onclick="closeAddClientModal()" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="addClientForm" onsubmit="handleAddClient(event)">
+                <div class="input-group">
+                    <label>Shop Name</label>
+                    <div class="input-wrapper"><input type="text" id="newShopName" required></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="input-group">
+                        <label>Owner Name</label>
+                        <div class="input-wrapper"><input type="text" id="newOwnerName" required></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Mobile</label>
+                        <div class="input-wrapper"><input type="text" required></div>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="input-group">
+                        <label>Plan</label>
+                        <div class="input-wrapper">
+                            <select id="newPlan">
+                                <option>Basic</option>
+                                <option>Standard</option>
+                                <option>Premium</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Commission (%)</label>
+                        <div class="input-wrapper"><input type="number" id="newComm" step="0.1" value="2.0"></div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block mt-4">Create Client Account</button>
+            </form>
+        </div>
+    </div>
+
+    
+    
+</div>
+    <div id="client-page" class="app-page" style="display:none;">
+    
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-store"></i> <span id="sidebar-shop-name">Shop Name</span>
+                </div>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" onclick="switchClientView('client-dashboard-view', this)">
+                        <i class="fa-solid fa-house"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href='#' onclick='showPage("pos-page")' class="nav-link">
+                        <i class="fa-solid fa-desktop"></i> POS Billing
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchClientView('products-view', this)">
+                        <i class="fa-solid fa-box-open"></i> Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchClientView('purchases-view', this)">
+                        <i class="fa-solid fa-cart-arrow-down"></i> Purchases
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchClientView('customers-view', this)">
+                        <i class="fa-solid fa-address-book"></i> Customers
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="user-profile-sm">
+                    <div class="avatar" style="background: var(--secondary)">SO</div>
+                    <div class="user-info">
+                        <div class="name">Shop Owner</div>
+                        <div class="role">Admin</div>
+                    </div>
+                </div>
+                <a href='#' onclick='showPage("login-page")' class="btn btn-outline btn-block mt-2">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content fade-in">
+            <!-- Top Header -->
+            <header class="top-header">
+                <button class="menu-toggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="header-search">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <div class="header-actions">
+                    <a href='#' onclick='showPage("pos-page")' class="btn btn-secondary btn-sm">
+                        <i class="fa-solid fa-plus"></i> New Bill
+                    </a>
+                    <button class="icon-btn">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge" id="alert-badge" style="display:none;">0</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="page-content">
+                
+                <!-- DASHBOARD VIEW -->
+                <div id="client-dashboard-view" class="view-section active">
+                    <div class="page-header">
+                        <div>
+                            <h2>Today's Overview</h2>
+                            <p class="text-muted">Here's your shop's activity for today.</p>
+                        </div>
+                    </div>
+                    <div class="stats-grid" id="client-stats"></div>
+                    <div class="grid-2">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3 class="panel-title">Recent Sales</h3>
+                                <a href='#' onclick='showPage("pos-page")' class="btn btn-outline btn-sm">New Sale</a>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="recent-sales-table">
+                                    <thead><tr><th>Invoice</th><th>Time</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3 class="panel-title text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Low Stock Alerts</h3>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="low-stock-table">
+                                    <thead><tr><th>Product</th><th>Current Stock</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRODUCTS VIEW -->
+                <div id="products-view" class="view-section">
+                    <div class="page-header">
+                        <div>
+                            <h2>Inventory Management</h2>
+                            <p class="text-muted">Manage your products, pricing, and stock.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="openModal('addProductModal')">
+                            <i class="fa-solid fa-plus"></i> Add Product
+                        </button>
+                    </div>
+                    <div class="panel">
+                        <div class="table-responsive">
+                            <table id="full-products-table">
+                                <thead>
+                                    <tr>
+                                        <th>Barcode</th>
+                                        <th>Product Name</th>
+                                        <th>Category</th>
+                                        <th>Purchase Price</th>
+                                        <th>Sale Price</th>
+                                        <th>Stock</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PURCHASES VIEW -->
+                <div id="purchases-view" class="view-section">
+                    <div class="page-header">
+                        <div>
+                            <h2>Purchase Stock</h2>
+                            <p class="text-muted">Add new inventory to your shop.</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="openModal('purchaseStockModal')">
+                            <i class="fa-solid fa-cart-plus"></i> New Purchase
+                        </button>
+                    </div>
+                    <div class="panel">
+                        <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                            <i class="fa-solid fa-truck-ramp-box" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <h3>Purchase History</h3>
+                            <p>Recent supplier purchases will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CUSTOMERS VIEW -->
+                <div id="customers-view" class="view-section">
+                    <div class="page-header">
+                        <div>
+                            <h2>Customers</h2>
+                            <p class="text-muted">View customer details and credit balances.</p>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="table-responsive">
+                            <table id="customers-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Total Purchases</th>
+                                        <th>Credit Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div id="addProductModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="glass-panel" style="width: 100%; max-width: 500px; padding: 2rem; border-radius: var(--radius-lg);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                <h3>Add New Product</h3>
+                <button onclick="closeModal('addProductModal')" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="addProductForm" onsubmit="handleAddProduct(event)">
+                <div class="input-group">
+                    <label>Product Name</label>
+                    <div class="input-wrapper"><input type="text" id="pName" required></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="input-group">
+                        <label>Barcode</label>
+                        <div class="input-wrapper"><input type="text" id="pBarcode" value="890123" required></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Category</label>
+                        <div class="input-wrapper"><input type="text" id="pCat" value="General"></div>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div class="input-group">
+                        <label>Pur. Price</label>
+                        <div class="input-wrapper"><input type="number" id="pPur" required></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Sale Price</label>
+                        <div class="input-wrapper"><input type="number" id="pSale" required></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Init. Stock</label>
+                        <div class="input-wrapper"><input type="number" id="pStock" required></div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block mt-4">Save Product</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Purchase Stock Modal -->
+    <div id="purchaseStockModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="glass-panel" style="width: 100%; max-width: 500px; padding: 2rem; border-radius: var(--radius-lg);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                <h3>Purchase Stock</h3>
+                <button onclick="closeModal('purchaseStockModal')" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="purchaseStockForm" onsubmit="handlePurchaseStock(event)">
+                <div class="input-group">
+                    <label>Select Product</label>
+                    <div class="input-wrapper">
+                        <select id="purSelectProduct" required>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="input-group">
+                        <label>Quantity</label>
+                        <div class="input-wrapper"><input type="number" id="purQty" min="1" value="10" required></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Supplier</label>
+                        <div class="input-wrapper"><input type="text" id="purSup" value="Wholesale Dist."></div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-secondary btn-block mt-4">Record Purchase</button>
+            </form>
+        </div>
+    </div>
+
+    
+    
+</div>
+    <div id="pos-page" class="app-page" style="display:none;">
+    <div class="pos-layout">
+        <!-- Products Section -->
+        <div class="pos-main">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2><i class="fa-solid fa-desktop text-primary"></i> Point of Sale</h2>
+                <a href='#' onclick='showPage("client-page")' class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+            </div>
+            
+            <div class="search-bar-lg">
+                <i class="fa-solid fa-barcode"></i>
+                <input type="text" id="pos-search" placeholder="Scan Barcode or Search Product (e.g. Sony, Apple)...">
+            </div>
+
+            <div class="product-grid" id="pos-product-grid">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+
+        <!-- Cart Section -->
+        <div class="pos-sidebar">
+            <div style="padding: 1rem; border-bottom: 1px solid var(--dark-surface-border); display: flex; gap: 0.5rem;">
+                <div class="input-wrapper" style="flex: 1;">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" placeholder="Add Customer (Optional)">
+                </div>
+            </div>
+
+            <div class="cart-items" id="cart-items">
+                <!-- Cart items will appear here -->
+                <div style="text-align: center; color: var(--text-muted); margin-top: 3rem;">
+                    <i class="fa-solid fa-cart-arrow-down" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p>Cart is empty</p>
+                    <p style="font-size: 0.8rem;">Scan a product to add</p>
+                </div>
+            </div>
+
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="cart-subtotal">₹0</span>
+                </div>
+                <div class="summary-row">
+                    <span>GST (18%)</span>
+                    <span id="cart-tax">₹0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Discount</span>
+                    <span class="text-success">-₹0</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span class="text-primary" id="cart-total">₹0</span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-outline" style="justify-content: center;" onclick="clearCart()">
+                        <i class="fa-solid fa-trash"></i> Clear
+                    </button>
+                    <button class="btn btn-secondary" style="justify-content: center;" onclick="generateBill()">
+                        <i class="fa-solid fa-money-bill-wave"></i> Pay Now
+                    </button>
+                </div>
+                <button class="btn btn-primary btn-block mt-2" onclick="alert('Bill sent via WhatsApp!')">
+                    <i class="fa-brands fa-whatsapp"></i> Send Bill on WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="billModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <div class="glass-panel" style="width: 100%; max-width: 400px; padding: 2.5rem; border-radius: var(--radius-lg); text-align: center;">
+            <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.2); color: var(--secondary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.5rem auto;">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h2 style="margin-bottom: 0.5rem;">Payment Successful!</h2>
+            <p class="text-muted" style="margin-bottom: 2rem;">Invoice #<span id="invoice-number-display">INV-2023-004</span> generated.</p>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <button class="btn btn-primary btn-block" onclick="document.getElementById('billModal').style.display='none'; clearCart();"><i class="fa-solid fa-print"></i> Print Receipt</button>
+                <button class="btn btn-outline btn-block" onclick="document.getElementById('billModal').style.display='none'; clearCart();">New Sale</button>
+            </div>
+        </div>
+    </div>
+
+    
+    
+</div>
+
+    <script>
+        window.addEventListener('error', function(e) {
+            alert("JS Error: " + e.message + " at " + e.filename + ":" + e.lineno);
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+            alert("Promise Rejection: " + e.reason);
+        });
+
+        function showPage(pageId) {
+            document.querySelectorAll('.app-page').forEach(p => p.style.display = 'none');
+            
+            if (pageId === 'login-page') {
+                document.getElementById(pageId).style.display = 'flex';
+            } else {
+                document.getElementById(pageId).style.display = 'block';
+            }
+            
+            if(pageId === 'admin-page' && typeof renderAdminUI === 'function') renderAdminUI();
+            if(pageId === 'client-page' && typeof renderClientUI === 'function') renderClientUI();
+            if(pageId === 'pos-page' && typeof renderProducts === 'function' && typeof globalData !== 'undefined') {
+                renderProducts(globalData.client.products);
+            }
+        }
+
+        
+        function switchPortal(type) {
+            // Update Buttons
+            document.querySelectorAll('.portal-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${type}`).classList.add('active');
+
+            // Update Forms
+            document.querySelectorAll('.login-form').forEach(form => {
+                form.classList.remove('active');
+                setTimeout(() => form.style.display = 'none', 300); // fade out duration
+            });
+            
+            const activeForm = document.getElementById(`${type}-login-form`);
+            setTimeout(() => {
+                activeForm.style.display = 'block';
+                setTimeout(() => activeForm.classList.add('active'), 10);
+            }, 300);
+        }
+
+        function handleLogin(e, redirectUrl) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        document.querySelectorAll('.app-page').forEach(p => p.style.display = 'none');
+        if (redirectUrl === 'admin-dashboard.html') {
+            document.getElementById('admin-page').style.display = 'block';
+            if(typeof renderAdminUI === 'function') renderAdminUI();
+        } else if (redirectUrl === 'client-dashboard.html') {
+            document.getElementById('client-page').style.display = 'block';
+            if(typeof renderClientUI === 'function') renderClientUI();
+        }
+
+            }, 800);
+        }
+    
+        
+        // Mock Data & LocalStorage Logic
+
+const defaultData = {
+    superAdmin: {
+        totalSales: 4500000,
+        totalPurchases: 2100000,
+        totalCommission: 90000,
+        pendingPayments: 15000,
+        recentTransactions: [
+            { id: 'TRX-001', client: 'ElectroHub', amount: 120000, commission: 2400, date: '2023-10-25' },
+            { id: 'TRX-002', client: 'Fashion Fiesta', amount: 85000, commission: 1700, date: '2023-10-25' },
+            { id: 'TRX-003', client: 'Grocery Plus', amount: 310000, commission: 6200, date: '2023-10-24' },
+            { id: 'TRX-004', client: 'Tech Gadgets', amount: 50000, commission: 1000, date: '2023-10-24' }
+        ],
+        clients: [
+            { id: 'CL-001', name: 'ElectroHub', owner: 'Rahul Sharma', plan: 'Premium', commission: 2, status: 'Active', joined: '2023-01-15', totalSales: 1500000 },
+            { id: 'CL-002', name: 'Fashion Fiesta', owner: 'Priya Patel', plan: 'Standard', commission: 2.5, status: 'Active', joined: '2023-03-22', totalSales: 800000 },
+            { id: 'CL-003', name: 'Grocery Plus', owner: 'Amit Kumar', plan: 'Basic', commission: 3, status: 'Inactive', joined: '2023-05-10', totalSales: 200000 },
+            { id: 'CL-004', name: 'Tech Gadgets', owner: 'Neha Singh', plan: 'Premium', commission: 2, status: 'Active', joined: '2023-08-05', totalSales: 600000 }
+        ]
+    },
+    
+    client: {
+        shopName: "ElectroHub",
+        todaySales: 45000,
+        todayPurchases: 12000,
+        totalStock: 1250,
+        lowStockItems: 1,
+        profitSummary: 8500,
+        products: [
+            { id: 'PRD-101', barcode: '8901234567890', name: 'Sony Bravia 55" 4K TV', category: 'Electronics', purchasePrice: 42000, salePrice: 55000, gst: 18, stock: 15 },
+            { id: 'PRD-102', barcode: '8901234567891', name: 'Samsung Galaxy S23', category: 'Mobiles', purchasePrice: 65000, salePrice: 75000, gst: 18, stock: 8 },
+            { id: 'PRD-103', barcode: '8901234567892', name: 'Apple AirPods Pro', category: 'Accessories', purchasePrice: 18000, salePrice: 22000, gst: 18, stock: 3 }, // Low Stock
+            { id: 'PRD-104', barcode: '8901234567893', name: 'Dell XPS 15 Laptop', category: 'Computers', purchasePrice: 110000, salePrice: 135000, gst: 18, stock: 5 },
+            { id: 'PRD-105', barcode: '8901234567894', name: 'JBL Flip 6 Bluetooth Speaker', category: 'Audio', purchasePrice: 7000, salePrice: 9999, gst: 18, stock: 25 }
+        ],
+        recentSales: [
+            { inv: 'INV-2023-001', customer: 'Ravi Verma', items: 2, total: 24500, status: 'Paid', time: '10:30 AM' },
+            { inv: 'INV-2023-002', customer: 'Walk-in Customer', items: 1, total: 9999, status: 'Paid', time: '11:15 AM' },
+            { inv: 'INV-2023-003', customer: 'Sita Ram', items: 3, total: 142000, status: 'Credit', time: '01:45 PM' },
+        ],
+        customers: [
+            { id: 'CUST-01', name: 'Ravi Verma', phone: '9876543210', totalPurchases: 45000, credit: 0 },
+            { id: 'CUST-02', name: 'Sita Ram', phone: '9988776655', totalPurchases: 152000, credit: 142000 },
+        ]
+    }
+};
+
+// Initialize or Load from LocalStorage
+let globalData;
+try {
+    globalData = JSON.parse(localStorage.getItem('saasifyData'));
+} catch(e) {
+    globalData = null;
+}
+
+if (!globalData || !globalData.client || !globalData.client.products || !globalData.superAdmin) {
+    globalData = defaultData;
+    saveData();
+}
+
+// Function to save data
+function saveData() {
+    localStorage.setItem('saasifyData', JSON.stringify(globalData));
+}
+
+// Utility to format currency
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+    }).format(amount);
+};
+
+// Global Mobile Sidebar Logic for multiple sidebars
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    document.body.appendChild(overlay);
+
+    document.querySelectorAll('.menu-toggle').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Find the closest sidebar in the same app-page
+            const appPage = e.target.closest('.app-page');
+            if (appPage) {
+                const sidebar = appPage.querySelector('.sidebar');
+                if (sidebar) {
+                    sidebar.classList.add('open');
+                    overlay.classList.add('active');
+                    
+                    // Attach overlay click to close this specific sidebar
+                    overlay.onclick = () => {
+                        sidebar.classList.remove('open');
+                        overlay.classList.remove('active');
+                    };
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                const sidebar = e.target.closest('.sidebar');
+                if(sidebar) sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+        });
+    });
+});
+
+        
+        document.addEventListener('DOMContentLoaded', () => {
+    renderAdminUI();
+});
+
+function switchAdminView(viewId, element) {
+    const adminPage = document.getElementById('admin-page');
+    adminPage.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    
+    adminPage.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    element.classList.add('active');
+    
+    renderAdminUI();
+}
+
+function renderAdminUI() {
+    // Load Admin Stats
+    const statsContainer = document.getElementById('admin-stats');
+    if (statsContainer) {
+        statsContainer.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-icon primary"><i class="fa-solid fa-bag-shopping"></i></div>
+                <div class="stat-details">
+                    <div class="label">Total Global Sales</div>
+                    <div class="value">${formatCurrency(globalData.superAdmin.totalSales)}</div>
+                    <div class="trend text-success"><i class="fa-solid fa-arrow-trend-up"></i> +12% from last month</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                <div class="stat-details">
+                    <div class="label">Total Commission Earned</div>
+                    <div class="value">${formatCurrency(globalData.superAdmin.totalCommission)}</div>
+                    <div class="trend text-success"><i class="fa-solid fa-arrow-trend-up"></i> +8% from last month</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon warning"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-details">
+                    <div class="label">Active Clients</div>
+                    <div class="value">${globalData.superAdmin.clients.filter(c => c.status === 'Active').length}</div>
+                    <div class="trend text-success">+1 this week</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Load Dashboard Clients Table
+    const dashClientsTable = document.querySelector('#dash-clients-table tbody');
+    if (dashClientsTable) {
+        dashClientsTable.innerHTML = '';
+        globalData.superAdmin.clients.slice(0, 4).forEach(client => {
+            const statusClass = client.status === 'Active' ? 'status-active' : 'status-inactive';
+            dashClientsTable.innerHTML += `
+                <tr>
+                    <td>
+                        <div style="font-weight: 500;">${client.name}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${client.owner}</div>
+                    </td>
+                    <td><span style="padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.8rem;">${client.plan} (${client.commission}%)</span></td>
+                    <td class="text-success" style="font-weight: 600;">${formatCurrency(client.totalSales)}</td>
+                    <td><span class="status-badge ${statusClass}">${client.status}</span></td>
+                </tr>
+            `;
+        });
+    }
+
+    // Load Full Clients Table
+    const fullClientsTable = document.querySelector('#full-clients-table tbody');
+    if (fullClientsTable) {
+        fullClientsTable.innerHTML = '';
+        globalData.superAdmin.clients.forEach(client => {
+            const statusClass = client.status === 'Active' ? 'status-active' : 'status-inactive';
+            const toggleIcon = client.status === 'Active' ? '<i class="fa-solid fa-ban"></i>' : '<i class="fa-solid fa-check"></i>';
+            const toggleColor = client.status === 'Active' ? 'text-danger' : 'text-success';
+            
+            fullClientsTable.innerHTML += `
+                <tr>
+                    <td style="color: var(--text-muted);">${client.id}</td>
+                    <td>
+                        <div style="font-weight: 500;">${client.name}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${client.owner}</div>
+                    </td>
+                    <td><span style="padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.8rem;">${client.plan} (${client.commission}%)</span></td>
+                    <td class="text-success" style="font-weight: 600;">${formatCurrency(client.totalSales)}</td>
+                    <td>${client.joined}</td>
+                    <td><span class="status-badge ${statusClass}">${client.status}</span></td>
+                    <td>
+                        <button class="icon-btn ${toggleColor}" title="Toggle Status" onclick="toggleClientStatus('${client.id}')">${toggleIcon}</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Load Transactions/Commission Table
+    const txTable = document.querySelector('#transactions-table tbody');
+    const fullCommTable = document.querySelector('#full-commission-table tbody');
+    
+    if (txTable) txTable.innerHTML = '';
+    if (fullCommTable) fullCommTable.innerHTML = '';
+
+    globalData.superAdmin.recentTransactions.forEach((tx, idx) => {
+        if(txTable && idx < 5) {
+            txTable.innerHTML += `
+                <tr>
+                    <td>${tx.client}</td>
+                    <td>${formatCurrency(tx.amount)}</td>
+                    <td class="text-primary" style="font-weight: 600;">+${formatCurrency(tx.commission)}</td>
+                </tr>
+            `;
+        }
+        if(fullCommTable) {
+            fullCommTable.innerHTML += `
+                <tr>
+                    <td>${tx.date}</td>
+                    <td style="color: var(--text-muted);">${tx.id}</td>
+                    <td style="font-weight: 500;">${tx.client}</td>
+                    <td>${formatCurrency(tx.amount)}</td>
+                    <td class="text-primary" style="font-weight: 600;">+${formatCurrency(tx.commission)}</td>
+                </tr>
+            `;
+        }
+    });
+}
+
+function toggleClientStatus(clientId) {
+    const client = globalData.superAdmin.clients.find(c => c.id === clientId);
+    if(client) {
+        client.status = client.status === 'Active' ? 'Inactive' : 'Active';
+        saveData();
+        renderAdminUI();
+    }
+}
+
+function openAddClientModal() {
+    document.getElementById('addClientModal').style.display = 'flex';
+}
+
+function closeAddClientModal() {
+    document.getElementById('addClientModal').style.display = 'none';
+    document.getElementById('addClientForm').reset();
+}
+
+function handleAddClient(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('newShopName').value;
+    const owner = document.getElementById('newOwnerName').value;
+    const plan = document.getElementById('newPlan').value;
+    const comm = document.getElementById('newComm').value;
+
+    const newId = `CL-00${globalData.superAdmin.clients.length + 1}`;
+    
+    globalData.superAdmin.clients.unshift({
+        id: newId,
+        name: name,
+        owner: owner,
+        plan: plan,
+        commission: parseFloat(comm),
+        status: 'Active',
+        joined: new Date().toISOString().split('T')[0],
+        totalSales: 0
+    });
+
+    saveData();
+    renderAdminUI();
+    closeAddClientModal();
+    alert('Client Added Successfully! UI has been updated.');
+}
+
+        
+        document.addEventListener('DOMContentLoaded', () => {
+    // Only run if not on POS page (POS has its own logic handling)
+    if(document.getElementById('client-stats')) {
+        renderClientUI();
+        populatePurchaseDropdown();
+    }
+});
+
+function switchClientView(viewId, element) {
+    const clientPage = document.getElementById('client-page');
+    clientPage.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    
+    clientPage.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    element.classList.add('active');
+    
+    renderClientUI();
+}
+
+function renderClientUI() {
+    console.log("Rendering Client UI", globalData.client);
+    const shopNameEl = document.getElementById('sidebar-shop-name');
+    if (shopNameEl) shopNameEl.innerText = globalData.client.shopName;
+
+    // Recalculate dynamic stats based on products array
+    globalData.client.totalStock = globalData.client.products.reduce((acc, p) => acc + parseInt(p.stock), 0);
+    const lowStockItems = globalData.client.products.filter(p => p.stock < 10);
+    globalData.client.lowStockItems = lowStockItems.length;
+
+    // Dashboard Stats
+    const statsContainer = document.getElementById('client-stats');
+    if (statsContainer) {
+        statsContainer.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-icon primary"><i class="fa-solid fa-cart-shopping"></i></div>
+                <div class="stat-details">
+                    <div class="label">Today's Sales</div>
+                    <div class="value">${formatCurrency(globalData.client.todaySales)}</div>
+                    <div class="trend text-success"><i class="fa-solid fa-arrow-trend-up"></i> Active</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon warning"><i class="fa-solid fa-boxes-stacked"></i></div>
+                <div class="stat-details">
+                    <div class="label">Total Stock Items</div>
+                    <div class="value">${globalData.client.totalStock}</div>
+                    <div class="trend ${globalData.client.lowStockItems > 0 ? 'text-danger' : 'text-success'}">${globalData.client.lowStockItems} low stock alerts</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success"><i class="fa-solid fa-wallet"></i></div>
+                <div class="stat-details">
+                    <div class="label">Estimated Profit</div>
+                    <div class="value">${formatCurrency(globalData.client.profitSummary)}</div>
+                    <div class="trend text-muted">For today</div>
+                </div>
+            </div>
+        `;
+
+        const badge = document.getElementById('alert-badge');
+        if (badge) {
+            if(globalData.client.lowStockItems > 0) {
+                badge.style.display = 'block';
+                badge.innerText = globalData.client.lowStockItems;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    }
+
+    // Dashboard Recent Sales Table
+    const salesTable = document.querySelector('#recent-sales-table tbody');
+    if (salesTable) {
+        salesTable.innerHTML = '';
+        globalData.client.recentSales.slice(0, 5).forEach(sale => {
+            const statusClass = sale.status === 'Paid' ? 'status-active' : 'status-warning';
+            salesTable.innerHTML += `
+                <tr>
+                    <td style="font-weight: 500;">${sale.inv}</td>
+                    <td class="text-muted">${sale.time}</td>
+                    <td>${sale.customer}</td>
+                    <td style="font-weight: 600;">${formatCurrency(sale.total)}</td>
+                    <td><span class="status-badge ${statusClass}">${sale.status}</span></td>
+                </tr>
+            `;
+        });
+    }
+
+    // Dashboard Low Stock Table
+    const lowStockTable = document.querySelector('#low-stock-table tbody');
+    if (lowStockTable) {
+        lowStockTable.innerHTML = '';
+        if(lowStockItems.length > 0) {
+            lowStockItems.forEach(prod => {
+                lowStockTable.innerHTML += `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 500;">${prod.name}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">SKU: ${prod.id}</div>
+                        </td>
+                        <td><span class="text-danger" style="font-weight: 700;">${prod.stock} Units Left</span></td>
+                    </tr>
+                `;
+            });
+        } else {
+            lowStockTable.innerHTML = `<tr><td colspan="2" class="text-center text-muted">No low stock items</td></tr>`;
+        }
+    }
+
+    // Full Products Table
+    const fullProductsTable = document.querySelector('#full-products-table tbody');
+    if (fullProductsTable) {
+        fullProductsTable.innerHTML = '';
+        globalData.client.products.forEach(prod => {
+            const stockColor = prod.stock < 10 ? 'text-danger' : (prod.stock > 50 ? 'text-success' : '');
+            fullProductsTable.innerHTML += `
+                <tr>
+                    <td style="color: var(--text-muted); font-family: monospace;">${prod.barcode}</td>
+                    <td style="font-weight: 500;">${prod.name}</td>
+                    <td>${prod.category}</td>
+                    <td>${formatCurrency(prod.purchasePrice)}</td>
+                    <td style="font-weight: 600;" class="text-primary">${formatCurrency(prod.salePrice)}</td>
+                    <td class="${stockColor}" style="font-weight: 700;">${prod.stock}</td>
+                    <td>
+                        <button class="icon-btn" title="Edit" onclick="alert('Edit feature demo')"><i class="fa-regular fa-pen-to-square"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Customers Table
+    const customersTable = document.querySelector('#customers-table tbody');
+    if (customersTable && globalData.client.customers) {
+        customersTable.innerHTML = '';
+        globalData.client.customers.forEach(cust => {
+            const creditClass = cust.credit > 0 ? 'text-danger' : 'text-success';
+            customersTable.innerHTML += `
+                <tr>
+                    <td style="color: var(--text-muted);">${cust.id}</td>
+                    <td style="font-weight: 500;">${cust.name}</td>
+                    <td>${cust.phone}</td>
+                    <td style="font-weight: 600;">${formatCurrency(cust.totalPurchases)}</td>
+                    <td class="${creditClass}" style="font-weight: 700;">${formatCurrency(cust.credit)}</td>
+                </tr>
+            `;
+        });
+    }
+}
+
+// Modal logic
+function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+function handleAddProduct(e) {
+    e.preventDefault();
+    const newProduct = {
+        id: `PRD-${100 + globalData.client.products.length + 1}`,
+        barcode: document.getElementById('pBarcode').value,
+        name: document.getElementById('pName').value,
+        category: document.getElementById('pCat').value,
+        purchasePrice: parseFloat(document.getElementById('pPur').value),
+        salePrice: parseFloat(document.getElementById('pSale').value),
+        gst: 18,
+        stock: parseInt(document.getElementById('pStock').value)
+    };
+
+    globalData.client.products.unshift(newProduct);
+    saveData();
+    renderClientUI();
+    populatePurchaseDropdown();
+    closeModal('addProductModal');
+    document.getElementById('addProductForm').reset();
+    alert('Product added successfully!');
+}
+
+function populatePurchaseDropdown() {
+    const select = document.getElementById('purSelectProduct');
+    if(!select) return;
+    select.innerHTML = '';
+    globalData.client.products.forEach(p => {
+        select.innerHTML += `<option value="${p.id}">${p.name} (Stock: ${p.stock})</option>`;
+    });
+}
+
+function handlePurchaseStock(e) {
+    e.preventDefault();
+    const productId = document.getElementById('purSelectProduct').value;
+    const qty = parseInt(document.getElementById('purQty').value);
+    
+    const product = globalData.client.products.find(p => p.id === productId);
+    if(product) {
+        product.stock += qty;
+        
+        // Update stats
+        const cost = product.purchasePrice * qty;
+        globalData.client.todayPurchases += cost;
+        
+        saveData();
+        renderClientUI();
+        populatePurchaseDropdown();
+        closeModal('purchaseStockModal');
+        document.getElementById('purchaseStockForm').reset();
+        alert(`Stock updated! Added ${qty} units to ${product.name}.`);
+    }
+}
+
+// --- POS Logic ---
+// (Runs only on pos.html)
+
+let cart = [];
+
+if(document.getElementById('pos-product-grid')) {
+    // POS Init
+    renderProducts(globalData.client.products);
+
+    const searchInput = document.getElementById('pos-search');
+    if(searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = globalData.client.products.filter(p => 
+                p.name.toLowerCase().includes(term) || p.barcode.includes(term)
+            );
+            renderProducts(filtered);
+        });
+    }
+}
+
+function renderProducts(products) {
+    const grid = document.getElementById('pos-product-grid');
+    if(!grid) return;
+    grid.innerHTML = '';
+    
+    products.forEach(p => {
+        const stockColor = p.stock === 0 ? 'color: var(--accent);' : 'color: var(--text-muted);';
+        grid.innerHTML += `
+            <div class="product-card" onclick="addToCart('${p.id}')" style="${p.stock === 0 ? 'opacity:0.5; pointer-events:none;' : ''}">
+                <div style="font-size: 2.5rem; color: var(--primary-light); margin-bottom: 0.5rem;"><i class="fa-solid fa-box"></i></div>
+                <div style="font-weight: 500; font-size: 0.9rem; margin-bottom: 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${p.name}</div>
+                <div style="color: var(--secondary-light); font-weight: 700; font-size: 1.1rem;">${formatCurrency(p.salePrice)}</div>
+                <div style="font-size: 0.75rem; ${stockColor} margin-top: 0.3rem;">Stock: ${p.stock}</div>
+            </div>
+        `;
+    });
+}
+
+function addToCart(productId) {
+    const product = globalData.client.products.find(p => p.id === productId);
+    if(!product) return;
+
+    const existing = cart.find(item => item.id === productId);
+    if(existing) {
+        if(existing.qty < product.stock) {
+            existing.qty++;
+        } else {
+            alert('Not enough stock!');
+        }
+    } else {
+        if(product.stock > 0) {
+            cart.push({...product, qty: 1});
+        }
+    }
+    updateCartUI();
+}
+
+function updateCartQty(productId, change) {
+    const item = cart.find(i => i.id === productId);
+    if(!item) return;
+
+    const product = globalData.client.products.find(p => p.id === productId);
+    
+    if(change > 0 && item.qty >= product.stock) {
+        alert('Not enough stock!');
+        return;
+    }
+    
+    item.qty += change;
+    if(item.qty <= 0) {
+        cart = cart.filter(i => i.id !== productId);
+    }
+    updateCartUI();
+}
+
+function updateCartUI() {
+    const cartContainer = document.getElementById('cart-items');
+    if(!cartContainer) return;
+
+    if(cart.length === 0) {
+        cartContainer.innerHTML = `
+            <div style="text-align: center; color: var(--text-muted); margin-top: 3rem;">
+                <i class="fa-solid fa-cart-arrow-down" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p>Cart is empty</p>
+                <p style="font-size: 0.8rem;">Scan a product to add</p>
+            </div>
+        `;
+        document.getElementById('cart-subtotal').innerText = '₹0';
+        document.getElementById('cart-tax').innerText = '₹0';
+        document.getElementById('cart-total').innerText = '₹0';
+        return;
+    }
+
+    let subtotal = 0;
+    cartContainer.innerHTML = '';
+
+    cart.forEach(item => {
+        const itemTotal = item.salePrice * item.qty;
+        subtotal += itemTotal;
+        
+        cartContainer.innerHTML += `
+            <div class="cart-item">
+                <div style="flex: 1;">
+                    <div style="font-weight: 500; font-size: 0.9rem;">${item.name}</div>
+                    <div style="color: var(--primary-light); font-weight: 600; font-size: 0.9rem;">${formatCurrency(item.salePrice)}</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem;">
+                    <div class="qty-controls">
+                        <button class="qty-btn" onclick="updateCartQty('${item.id}', -1)"><i class="fa-solid fa-minus"></i></button>
+                        <span style="font-weight: 600; font-size: 0.9rem; width: 20px; text-align: center;">${item.qty}</span>
+                        <button class="qty-btn" onclick="updateCartQty('${item.id}', 1)"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                    <div style="font-weight: 700;">${formatCurrency(itemTotal)}</div>
+                </div>
+            </div>
+        `;
+    });
+
+    const tax = subtotal * 0.18; // 18% GST approx simulation for display
+    const total = subtotal + tax;
+
+    document.getElementById('cart-subtotal').innerText = formatCurrency(subtotal);
+    document.getElementById('cart-tax').innerText = formatCurrency(tax);
+    document.getElementById('cart-total').innerText = formatCurrency(total);
+}
+
+function clearCart() {
+    cart = [];
+    updateCartUI();
+}
+
+function generateBill() {
+    if(cart.length === 0) {
+        alert("Cart is empty!");
+        return;
+    }
+
+    // Process checkout: reduce stock, increase sales
+    let subtotal = 0;
+    let profit = 0;
+    
+    cart.forEach(item => {
+        const product = globalData.client.products.find(p => p.id === item.id);
+        if(product) {
+            product.stock -= item.qty;
+            subtotal += (item.salePrice * item.qty);
+            profit += ((item.salePrice - item.purchasePrice) * item.qty);
+        }
+    });
+
+    const total = subtotal * 1.18; // plus gst
+
+    // Add to recent sales
+    const invoiceNum = `INV-2023-00${globalData.client.recentSales.length + 1}`;
+    globalData.client.recentSales.unshift({
+        inv: invoiceNum,
+        customer: 'Walk-in Customer',
+        items: cart.length,
+        total: total,
+        status: 'Paid',
+        time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+    });
+
+    // Update global dashboard stats
+    globalData.client.todaySales += total;
+    globalData.client.profitSummary += profit;
+
+    // Super Admin global sync
+    globalData.superAdmin.totalSales += total;
+
+    saveData();
+    renderProducts(globalData.client.products); // refresh grid to show new stock
+
+    const modal = document.getElementById('billModal');
+    if(modal) {
+        document.getElementById('invoice-number-display').innerText = invoiceNum;
+        modal.style.display = 'flex';
+    }
+}
+
+    </script>
+</body>
+</html>
